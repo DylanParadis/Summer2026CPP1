@@ -271,7 +271,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: DonutPlains1_DONE_6
+      name: ShrinkDown
       rect:
         serializedVersion: 2
         x: 240
@@ -359,7 +359,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: DonutPlains1_DONE_10
+      name: GrowUp
       rect:
         serializedVersion: 2
         x: 240
@@ -403,7 +403,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: DonutPlains1_DONE_12
+      name: 1Up
       rect:
         serializedVersion: 2
         x: 240
@@ -460,20 +460,20 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
+      1Up: -6400644745172546573
       Coin: -6223913005026926526
       DonutPlains1_DONE_0: -4424372450760166762
-      DonutPlains1_DONE_10: -4155499301291857916
       DonutPlains1_DONE_11: -6150482773385901676
-      DonutPlains1_DONE_12: -6400644745172546573
       DonutPlains1_DONE_13: -1617794307008389237
       DonutPlains1_DONE_3: -8251548219702976207
       DonutPlains1_DONE_4: -3135234623664698759
       DonutPlains1_DONE_5: -5401252091279294996
-      DonutPlains1_DONE_6: 6902963903534496507
       DonutPlains1_DONE_7: -1207279636931453471
       DonutPlains1_DONE_8: 6343335243216876344
       DonutPlains1_DONE_9: 8963360740990433023
       DragonCoin: -7698091877536220419
+      GrowUp: -4155499301291857916
+      ShrinkDown: 6902963903534496507
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

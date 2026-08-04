@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(
@@ -20,6 +21,30 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private int maxJumpCount = 1;
 
+    [Header("Jump Pickup")]
+    [SerializeField]
+    private float jumpForcePowerup = 15f;
+
+    [SerializeField]
+    private float initialPowerupDuration = 5f;
+
+    [Header("Speed Pickup")]
+    [SerializeField]
+    private float speedPowerup = 7f;
+
+    [SerializeField]
+    private float initialSpeedPowerupDuration = 5f;
+
+    [Header("Size Pickups")]
+    [SerializeField]
+    private float shrinkScaleMultiplier = 0.65f;
+
+    [SerializeField]
+    private float growScaleMultiplier = 1.5f;
+
+    [SerializeField]
+    private float initialSizePowerupDuration = 5f;
+
     #endregion
 
     #region Component References
@@ -32,7 +57,54 @@ public class PlayerController : MonoBehaviour
 
     #endregion
 
+    #region Lives
+
+    public int maxLives = 9;
+    public int currentLives = 3;
+
+    // Pickup scripts can read or change the player's lives through this property.
+    public int Lives
+    {
+        get => currentLives;
+        set
+        {
+            int previousLives = currentLives;
+            currentLives = Mathf.Clamp(value, 0, maxLives);
+
+            if (currentLives == 0 && previousLives > 0)
+            {
+                // Game-over logic can be added here later.
+                Debug.Log("Game over logic happens here");
+            }
+            else if (currentLives < previousLives)
+            {
+                // Respawn logic can be added here later.
+                Debug.Log("Respawn logic happens here");
+            }
+
+            Debug.Log(
+                "Lives: " + currentLives +
+                " Max Lives: " + maxLives
+            );
+        }
+    }
+
+    #endregion
+
     private int jumpCount = 0;
+
+    private float initialJumpForce;
+    private float currentPowerupDuration = 0f;
+    private Coroutine jumpForceCoroutine;
+
+    private float initialSpeed;
+    private float currentSpeedPowerupDuration = 0f;
+    private Coroutine speedCoroutine;
+
+    private Vector3 initialScale;
+    private float activeScaleMultiplier = 1f;
+    private float currentSizePowerupDuration = 0f;
+    private Coroutine sizeCoroutine;
 
     private void Start()
     {
@@ -45,11 +117,13 @@ public class PlayerController : MonoBehaviour
         check.Init(col, rb);
 
         rb.linearVelocity = Vector2.zero;
+        initialJumpForce = jumpForce;
+        initialSpeed = speed;
+        initialScale = transform.localScale;
     }
 
     private void Update()
     {
-        AnimatorClipInfo[] clipInfo = anim.GetCurrentAnimatorClipInfo(0);
         bool isGroundedThisFrame = check.CheckGround();
 
         float horizontalInput = Input.GetAxis("Horizontal");
@@ -118,8 +192,6 @@ public class PlayerController : MonoBehaviour
         );
         anim.SetBool("isLookingUp", isLookingUp);
         anim.SetBool("isDucking", isDucking);
-
-        if (fireInput) anim.SetTrigger("Fire");
     }
 
     private void SpriteFlip(float horizontalInput)
@@ -130,4 +202,141 @@ public class PlayerController : MonoBehaviour
             sr.flipX = !sr.flipX;
         }
     }
+
+    #region Jump Powerup
+
+    // Called by the jump-powerup pickup script.
+    public void StartJumpForceChange()
+    {
+        // Collecting another pickup while powered up adds more time.
+        currentPowerupDuration += initialPowerupDuration;
+
+        if (jumpForceCoroutine == null)
+        {
+            jumpForceCoroutine = StartCoroutine(
+                JumpForceChangeCoroutine()
+            );
+        }
+    }
+
+    private IEnumerator JumpForceChangeCoroutine()
+    {
+        jumpForce = jumpForcePowerup;
+
+        while (currentPowerupDuration > 0f)
+        {
+            currentPowerupDuration -= Time.deltaTime;
+            yield return null;
+        }
+
+        jumpForce = initialJumpForce;
+        currentPowerupDuration = 0f;
+        jumpForceCoroutine = null;
+    }
+
+    #endregion
+
+    #region Speed Powerup
+
+    // Called by the speed-powerup pickup script.
+    public void StartSpeedChange()
+    {
+        // Collecting another pickup while powered up adds more time.
+        currentSpeedPowerupDuration += initialSpeedPowerupDuration;
+
+        if (speedCoroutine == null)
+        {
+            speedCoroutine = StartCoroutine(
+                SpeedChangeCoroutine()
+            );
+        }
+    }
+
+    private IEnumerator SpeedChangeCoroutine()
+    {
+        speed = speedPowerup;
+
+        while (currentSpeedPowerupDuration > 0f)
+        {
+            currentSpeedPowerupDuration -= Time.deltaTime;
+            yield return null;
+        }
+
+        speed = initialSpeed;
+        currentSpeedPowerupDuration = 0f;
+        speedCoroutine = null;
+    }
+
+    #endregion
+
+    #region Size Powerups
+
+    // Called by the shrink pickup.
+    public void StartShrinkChange()
+    {
+        StartSizeChange(shrinkScaleMultiplier);
+    }
+
+    // Called by the grow pickup.
+    public void StartGrowChange()
+    {
+        StartSizeChange(growScaleMultiplier);
+    }
+
+    private void StartSizeChange(float newScaleMultiplier)
+    {
+        bool isSameSizeEffect =
+            sizeCoroutine != null &&
+            Mathf.Approximately(
+                activeScaleMultiplier,
+                newScaleMultiplier
+            );
+
+        activeScaleMultiplier = newScaleMultiplier;
+
+        // Matching pickups add time. The opposite effect replaces the current
+        // size and starts a fresh timer rather than multiplying the scale.
+        if (isSameSizeEffect)
+        {
+            currentSizePowerupDuration += initialSizePowerupDuration;
+        }
+        else
+        {
+            currentSizePowerupDuration = initialSizePowerupDuration;
+        }
+
+        ApplySizeMultiplier(activeScaleMultiplier);
+
+        if (sizeCoroutine == null)
+        {
+            sizeCoroutine = StartCoroutine(
+                SizeChangeCoroutine()
+            );
+        }
+    }
+
+    private IEnumerator SizeChangeCoroutine()
+    {
+        while (currentSizePowerupDuration > 0f)
+        {
+            currentSizePowerupDuration -= Time.deltaTime;
+            yield return null;
+        }
+
+        ApplySizeMultiplier(1f);
+        activeScaleMultiplier = 1f;
+        currentSizePowerupDuration = 0f;
+        sizeCoroutine = null;
+    }
+
+    private void ApplySizeMultiplier(float multiplier)
+    {
+        transform.localScale = new Vector3(
+            initialScale.x * multiplier,
+            initialScale.y * multiplier,
+            initialScale.z
+        );
+    }
+
+    #endregion
 }
