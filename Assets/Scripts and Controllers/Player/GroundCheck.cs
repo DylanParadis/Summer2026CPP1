@@ -5,8 +5,7 @@ public class GroundCheck : MonoBehaviour
     // Ground check variables that are set in the inspector
     [SerializeField]
     private LayerMask groundLayer;
-    [SerializeField]
-    private float groundCheckRadius = 0.2f;
+    
     public bool isGrounded { get; private set; }
 
     private Collider2D col;

@@ -339,4 +339,49 @@ public class PlayerController : MonoBehaviour
     }
 
     #endregion
+
+    #region Enemy Interactions
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        // Jumping on an enemy's Squish trigger.
+        if (collision.CompareTag("Squish") && rb.linearVelocityY <= 0f)
+        {
+            BaseEnemy enemy = collision.GetComponentInParent<BaseEnemy>();
+
+            if (enemy != null)
+            {
+                enemy.TakeDamage(1, DamageType.JumpedOn);
+
+                rb.linearVelocityY = 0f;
+                rb.AddForceY(jumpForce, ForceMode2D.Impulse);
+            }
+
+            return;
+        }
+
+        // Enemy turret projectile uses a trigger collider.
+        if (collision.CompareTag("EnemyProjectile"))
+        {
+            TakeProjectileHit(collision.gameObject);
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Also supports an enemy projectile that uses a normal collider.
+        if (collision.gameObject.CompareTag("EnemyProjectile"))
+        {
+            TakeProjectileHit(collision.gameObject);
+        }
+    }
+
+    private void TakeProjectileHit(GameObject projectile)
+    {
+        Lives--;
+        Destroy(projectile);
+    }
+
+    #endregion
+
 }
