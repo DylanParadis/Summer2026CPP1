@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 [RequireComponent(
     typeof(Rigidbody2D),
@@ -90,11 +91,19 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (Time.timeScale == 0f)
+        {
+            return;
+        }
+
         bool isGroundedThisFrame = check.CheckGround();
 
         float horizontalInput = Input.GetAxis("Horizontal");
         bool jumpInput = Input.GetButtonDown("Jump");
-        bool fireInput = Input.GetButtonDown("Fire1");
+        bool fireInput =
+    Input.GetButtonDown("Fire1") &&
+    (EventSystem.current == null ||
+     !EventSystem.current.IsPointerOverGameObject());
         float verticalInput = Input.GetAxisRaw("Vertical");
 
         if (fireInput)

@@ -1088,6 +1088,7 @@ MonoBehaviour:
   startButton: {fileID: 1907789213}
   settingsButton: {fileID: 1406302563}
   quitButton: {fileID: 5331542}
+  pauseQuitButton: {fileID: 0}
   resumeButton: {fileID: 0}
   returnToMenuButton: {fileID: 0}
   backButton: {fileID: 1514944613}

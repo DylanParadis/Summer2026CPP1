@@ -9,6 +9,7 @@ public class CanvasManager : MonoBehaviour
     [SerializeField] private Button startButton;
     [SerializeField] private Button settingsButton;
     [SerializeField] private Button quitButton;
+    [SerializeField] private Button pauseQuitButton;
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button returnToMenuButton;
     [SerializeField] private Button backButton;
@@ -21,7 +22,9 @@ public class CanvasManager : MonoBehaviour
     [SerializeField] private GameObject settingsMenu;
     [SerializeField] private GameObject pauseMenu;
 
-    void Start()
+    private bool isPaused = false;
+
+    private void Start()
     {
         if (startButton)
             startButton.onClick.AddListener(GameManager.Instance.StartGame);
@@ -34,10 +37,11 @@ public class CanvasManager : MonoBehaviour
         if (quitButton)
             quitButton.onClick.AddListener(QuitGame);
 
+        if (pauseQuitButton)
+            pauseQuitButton.onClick.AddListener(QuitGame);
+
         if (resumeButton)
-            resumeButton.onClick.AddListener(
-                () => SetMenu(null, pauseMenu)
-            );
+            resumeButton.onClick.AddListener(ResumeGame);
 
         if (returnToMenuButton)
             returnToMenuButton.onClick.AddListener(
@@ -51,34 +55,52 @@ public class CanvasManager : MonoBehaviour
 
         if (livesText)
         {
-            GameManager.Instance.OnLivesChanged +=
-                (lives) =>
-                    livesText.text = "Lives: " + lives.ToString();
-
-            livesText.text =
-                "Lives: " + GameManager.Instance.Lives.ToString();
+            GameManager.Instance.OnLivesChanged += UpdateLivesText;
+            UpdateLivesText(GameManager.Instance.Lives);
         }
     }
 
-    void Update()
+    private void Update()
     {
-        if (!pauseMenu) return;
+        if (!pauseMenu)
+            return;
 
         if (Input.GetKeyDown(KeyCode.P))
         {
-            if (pauseMenu.activeSelf)
-                SetMenu(null, pauseMenu);
+            if (isPaused)
+                ResumeGame();
             else
-                SetMenu(pauseMenu, null);
+                PauseGame();
         }
     }
 
-    void ChangeScene(string sceneName)
+    private void PauseGame()
     {
+        isPaused = true;
+        pauseMenu.SetActive(true);
+        Time.timeScale = 0f;
+    }
+
+    private void ResumeGame()
+    {
+        isPaused = false;
+
+        if (pauseMenu)
+            pauseMenu.SetActive(false);
+
+        Time.timeScale = 1f;
+    }
+
+    private void ChangeScene(string sceneName)
+    {
+        // Never carry a paused time scale into another scene.
+        Time.timeScale = 1f;
+        isPaused = false;
+
         SceneManager.LoadScene(sceneName);
     }
 
-    void QuitGame()
+    private void QuitGame()
     {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
@@ -87,7 +109,7 @@ public class CanvasManager : MonoBehaviour
 #endif
     }
 
-    void SetMenu(
+    private void SetMenu(
         GameObject menuToActivate,
         GameObject menuToDeactivate
     )
@@ -97,5 +119,19 @@ public class CanvasManager : MonoBehaviour
 
         if (menuToDeactivate != null)
             menuToDeactivate.SetActive(false);
+    }
+
+    private void UpdateLivesText(int lives)
+    {
+        if (livesText)
+            livesText.text = "Lives: " + lives;
+    }
+
+    private void OnDestroy()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnLivesChanged -= UpdateLivesText;
+        }
     }
 }
