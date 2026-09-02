@@ -57,40 +57,6 @@ public class PlayerController : MonoBehaviour
 
     #endregion
 
-    #region Lives
-
-    public int maxLives = 9;
-    public int currentLives = 3;
-
-    // Pickup scripts can read or change the player's lives through this property.
-    public int Lives
-    {
-        get => currentLives;
-        set
-        {
-            int previousLives = currentLives;
-            currentLives = Mathf.Clamp(value, 0, maxLives);
-
-            if (currentLives == 0 && previousLives > 0)
-            {
-                // Game-over logic can be added here later.
-                Debug.Log("Game over logic happens here");
-            }
-            else if (currentLives < previousLives)
-            {
-                // Respawn logic can be added here later.
-                Debug.Log("Respawn logic happens here");
-            }
-
-            Debug.Log(
-                "Lives: " + currentLives +
-                " Max Lives: " + maxLives
-            );
-        }
-    }
-
-    #endregion
-
     private int jumpCount = 0;
 
     private float initialJumpForce;
@@ -150,11 +116,6 @@ public class PlayerController : MonoBehaviour
 
             rb.linearVelocityY = 0f;
             rb.AddForceY(jumpForce, ForceMode2D.Impulse);
-
-            Debug.Log(
-                "Jump Count: " + jumpCount +
-                " Max Jumps: " + maxJumpCount
-            );
         }
 
         if (isGroundedThisFrame && rb.linearVelocityY <= 0.1f)
@@ -378,7 +339,7 @@ public class PlayerController : MonoBehaviour
 
     private void TakeProjectileHit(GameObject projectile)
     {
-        Lives--;
+        GameManager.Instance.Lives--;
         Destroy(projectile);
     }
 

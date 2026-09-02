@@ -23,31 +23,31 @@ public class SimplePickup : MonoBehaviour
             switch (type)
             {
                 case PickupType.Health:
-                    player.Lives = Mathf.Min(
-                        ++player.Lives,
-                        player.maxLives
+                    GameManager.Instance.Lives = Mathf.Min(
+                        GameManager.Instance.Lives + 1,
+                        GameManager.Instance.maxLives
                     );
-                    Debug.Log("Picked up Health!");
+                    
                     break;
 
                 case PickupType.JumpBoost:
                     player.StartJumpForceChange();
-                    Debug.Log("Picked up Jump Boost!");
+                   
                     break;
 
                 case PickupType.SpeedBoost:
                     player.StartSpeedChange();
-                    Debug.Log("Picked up Speed Boost!");
+                 
                     break;
 
                 case PickupType.Shrink:
                     player.StartShrinkChange();
-                    Debug.Log("Picked up Shrink!");
+                    
                     break;
 
                 case PickupType.Grow:
                     player.StartGrowChange();
-                    Debug.Log("Picked up Grow!");
+                    
                     break;
             }
 

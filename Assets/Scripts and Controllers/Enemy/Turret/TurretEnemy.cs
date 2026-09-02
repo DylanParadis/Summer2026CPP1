@@ -17,12 +17,10 @@ public class TurretEnemy : BaseEnemy
 
         shoot = GetComponent<Shoot>();
 
-        GameObject playerObject =
-            GameObject.FindGameObjectWithTag("Player");
-
-        if (playerObject != null)
+        if (GameManager.Instance != null &&
+        GameManager.Instance.playerInstance != null)
         {
-            player = playerObject.transform;
+            SetPlayer(GameManager.Instance.playerInstance);
         }
 
         if (fireRate <= 0f)
@@ -32,6 +30,27 @@ public class TurretEnemy : BaseEnemy
 
         shoot.OnShotFired +=
             (velocity) => timeSinceLastShot = 0f;
+    }
+
+    private void OnEnable()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnPlayerSpawned += SetPlayer;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnPlayerSpawned -= SetPlayer;
+        }
+    }
+
+    private void SetPlayer(GameObject playerObject)
+    {
+        player = playerObject.transform;
     }
 
     private void Update()
